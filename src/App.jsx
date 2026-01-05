@@ -233,8 +233,7 @@ function App() {
             </select>
             <input type="number" placeholder="Monto Lps" style={inputStyle} value={compra.monto} onChange={(e)=>setCompra({...compra, monto:e.target.value})} />
             <input type="text" placeholder="Descripción" style={inputStyle} value={compra.desc} onChange={(e)=>setCompra({...compra, desc:e.target.value})} />
-            <label style={{...cameraBtn, background: compra.foto ? COLOR_ACCENT : '#f1f5f9'}}><Camera size={18}/> <span>{compra.foto ? "FACTURA LISTA" : "ADJUNTAR FACTURA"}</span><input type="file" accept="image/*" capture="environment" hidden onChange={(e)=>setCompra({...compra, foto:e.target.files[0]})} /></label>
-            <button onClick={registrarGasto} style={{...btnPro, background: loading ? '#cbd5e1' : COLOR_IP_PRIMARY}} disabled={loading}>{loading ? "PROCESANDO..." : "REGISTRAR GASTO"}</button>
+<label style={{...cameraBtn, background: compra.foto ? COLOR_ACCENT : '#f1f5f9'}}><Camera size={18}/> <span>{compra.foto ? "ARCHIVO LISTO ✅" : "ADJUNTAR FACTURA"}</span><input type="file" accept="image/*,.pdf" hidden onChange={(e)=>setCompra({...compra, foto:e.target.files[0]})} /></label>            <button onClick={registrarGasto} style={{...btnPro, background: loading ? '#cbd5e1' : COLOR_IP_PRIMARY}} disabled={loading}>{loading ? "PROCESANDO..." : "REGISTRAR GASTO"}</button>
           </div>
         )}
 
