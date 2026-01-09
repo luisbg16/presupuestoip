@@ -3,7 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 import * as XLSX from 'xlsx';
 import { 
   LayoutDashboard, Receipt, UploadCloud, History, 
-  Camera, LogOut, FileSpreadsheet, BarChart3, UserCheck, ShieldCheck, Eye, ChevronDown, ChevronUp
+  Camera, LogOut, FileSpreadsheet, BarChart3, UserCheck, ShieldCheck, Eye, ChevronDown, ChevronUp, Download
 } from 'lucide-react';
 
 const supabase = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_ANON_KEY);
@@ -50,6 +50,13 @@ function App() {
     reader.readAsArrayBuffer(archivoExcel);
     reader.onload = async (e) => {
       try {
+        // --- PARTE NUEVA: GUARDAR EL ARCHIVO ORIGINAL ---
+        const { error: uploadError } = await supabase.storage
+          .from('facturas') // Usamos el bucket existente para no complicar
+          .upload('ultimo_presupuesto.xlsx', archivoExcel, { upsert: true });
+        if (uploadError) console.error("Error guardando backup:", uploadError);
+        // -----------------------------------------------
+
         const data = new Uint8Array(e.target.result);
         const workbook = XLSX.read(data, { type: 'array' });
         const sheet = workbook.Sheets[workbook.SheetNames[0]];
@@ -318,7 +325,15 @@ function App() {
           <div style={card}>
             <h3 style={cardTitle}><UploadCloud size={18}/> Excel</h3>
             <input type="file" accept=".xlsx, .xls" style={{margin:'20px 0', fontSize:'12px'}} onChange={(e) => setArchivoExcel(e.target.files[0])} />
-            <button onClick={importarExcelIP} style={{...btnPro, background: loading ? '#94a3b8' : '#16a34a'}} disabled={loading}>{loading ? "PROCESANDO..." : "SUBIR PRESUPUESTO"}</button>
+            <button onClick={importarExcelIP} style={{...btnPro, background: loading ? '#94a3b8' : '#16a34a', marginBottom: '10px'}} disabled={loading}>{loading ? "PROCESANDO..." : "SUBIR PRESUPUESTO"}</button>
+            
+            {/* BOTÓN NUEVO PARA DESCARGAR EL ORIGINAL */}
+            <button 
+              onClick={() => window.open(`${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/facturas/ultimo_presupuesto.xlsx`, '_blank')} 
+              style={{...btnPro, background: '#f1f5f9', color: '#475569', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'}}
+            >
+              <Download size={18}/> DESCARGAR PRESUPUESTO ORIGINAL
+            </button>
           </div>
         )}
       </main>
