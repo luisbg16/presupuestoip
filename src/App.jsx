@@ -12,7 +12,7 @@ const COLOR_IP_PRIMARY = "#005aba";
 const COLOR_ACCENT = "#ffd100";
 const HOY = new Date().toISOString().split('T')[0];
 
-const ADMIN_EMAILS = ["cavendano@chorotega.hn", "test@admin.com", "administracion@procoopsa.com"];
+const ADMIN_EMAILS = ["cavendano@chorotega.hn", "test@admin.com", "mrodriguez@chorotega.hn", "lberrios@chorotega.hn"];
 
 function App() {
   const [session, setSession] = useState(null);
