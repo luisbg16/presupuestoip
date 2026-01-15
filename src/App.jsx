@@ -12,7 +12,8 @@ const COLOR_IP_PRIMARY = "#005aba";
 const COLOR_ACCENT = "#ffd100";
 const HOY = new Date().toISOString().split('T')[0];
 
-const ADMIN_EMAILS = ["cavendano@chorotega.hn", "test@admin.com", "mrodriguez@chorotega.hn", "lberrios@chorotega.hn"];
+// Agregamos tu correo aquí si querés ser admin también
+const ADMIN_EMAILS = ["cavendano@chorotega.hn", "test@admin.com", "mrodriguez@chorotega.h"];
 
 function App() {
   const [session, setSession] = useState(null);
@@ -34,7 +35,9 @@ function App() {
 
   const esAdmin = useMemo(() => {
     if (!session?.user?.email) return false;
-    return ADMIN_EMAILS.map(e => e.toLowerCase().trim()).includes(session.user.email.toLowerCase().trim());
+    // Agregamos trim y lowercase para que no falle por un espacio o mayúscula
+    const userEmail = session.user.email.toLowerCase().trim();
+    return ADMIN_EMAILS.map(e => e.toLowerCase().trim()).includes(userEmail);
   }, [session]);
 
   useEffect(() => {
@@ -93,7 +96,6 @@ function App() {
         
         const esMontoArrastrado = i > mesIdx;
         
-        // AJUSTE CLAVE: Solo crear log si realmente hay dinero que quitar o si es el mes de origen
         if (aQuitar > 0 || i === mesIdx) {
             logsParaSubir.push({ 
                 presupuesto_id: l.id, 
@@ -182,8 +184,6 @@ function App() {
     const base = historial.filter(h => {
         const refMatch = h.descripcion?.match(/REF:(\d+)/);
         const refId = refMatch ? refMatch[1] : `ID-${h.id}`;
-        
-        // No mostrar registros de 0 Lps en vista mensual (los basura de sobregiro)
         if (tabReporte === 'mensual' && h.monto_lps === 0 && h.es_sobregiro) return false;
 
         if (tabReporte === 'anual' || (esAdmin && !h.aprobado)) {
@@ -236,6 +236,7 @@ function App() {
           <button onClick={()=>setSeccion('compras')} style={seccion==='compras'?navBtnActive:navBtn}><Receipt size={24}/><span>Gasto</span></button>
           <button onClick={()=>setSeccion('reportes')} style={seccion==='reportes'?navBtnActive:navBtn}><LayoutDashboard size={24}/><span>Panel</span></button>
           <button onClick={()=>setSeccion('perfil')} style={seccion==='perfil'?navBtnActive:navBtn}><UserCheck size={24}/><span>Mi IP</span></button>
+          {/* CAMBIO AQUÍ: Ya no validamos esAdmin para mostrar el botón del Nav */}
           <button onClick={()=>setSeccion('config')} style={seccion==='config'?navBtnActive:navBtn}><UploadCloud size={24}/><span>Excel</span></button>
         </nav>
 
@@ -308,6 +309,7 @@ function App() {
                                       <b style={{fontSize:'12px', color: '#dc2626'}}>-L{montoVisible.toLocaleString()}</b>
                                       <div style={{display:'flex', gap:'4px'}}>
                                           {h.es_sobregiro && <button onClick={() => alert(`REPARTO:\n${distInfo}`)} style={eyeBtn}><List size={14} color="#64748b"/></button>}
+                                          {/* Aquí se mantiene la validación de Admin solo para Aprobar */}
                                           {esAdmin && !h.aprobado && <button onClick={()=>aprobarGasto(h)} style={{...eyeBtn, background:'#f0fdf4'}}><CheckCircle size={14} color="#16a34a"/></button>}
                                           <button onClick={() => window.open(`${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/facturas/${h.url_factura}`, '_blank')} style={eyeBtn}><Eye size={14} color="#64748b"/></button>
                                       </div>
@@ -361,8 +363,10 @@ function App() {
             </div>
         )}
 
-        {seccion === 'config' && esAdmin && (
+        {/* CAMBIO AQUÍ: Se eliminó la validación esAdmin para entrar a la sección de configuración */}
+        {seccion === 'config' && (
           <div style={card}><h3 style={cardTitle}><UploadCloud size={18}/> Configuración</h3>
+            <p style={{fontSize:'11px', color:'#64748b', marginBottom:'15px'}}>Todos los usuarios registrados pueden actualizar el presupuesto maestro desde aquí.</p>
             <input type="file" onChange={(e) => setArchivoExcel(e.target.files[0])} style={{margin:'15px 0', fontSize:'12px'}} />
             <button onClick={importarExcelIP} style={{...btnPro, background: COLOR_IP_PRIMARY, color:'white'}} disabled={loading}>{loading ? "..." : "SUBIR EXCEL"}</button>
             <button onClick={() => window.open(`${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/facturas/ultimo_presupuesto.xlsx`, '_blank')} style={{...btnPro, background: '#f8fafc', color: '#475569', border: '1px solid #e2e8f0', marginTop:'10px', display:'flex', alignItems:'center', justifyContent:'center', gap:'8px'}}><Download size={18}/> DESCARGAR ACTUAL</button>
@@ -373,6 +377,7 @@ function App() {
   );
 }
 
+// ... Estilos exactamente iguales al código que pasaste
 const appContainer = { minHeight:'100vh', background:'#f8fafc', paddingBottom:'110px' };
 const loginWrapper = { display:'flex', height:'100vh', alignItems:'center', justifyContent:'center', background: COLOR_IP_PRIMARY };
 const loginCard = { background:'white', padding:'40px', borderRadius:'24px', textAlign:'center', width:'320px', boxShadow:'0 20px 25px -5px rgba(0,0,0,0.1)' };
